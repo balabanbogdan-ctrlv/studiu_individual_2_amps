@@ -2,7 +2,7 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Generator de albume foto</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script>
@@ -14,76 +14,96 @@
     } } }
   };
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Bricolage+Grotesque:wght@400;600&display=swap">
+<!-- Elimină data și titlul adăugate de browser la tipărire / PDF. Tailwind nu poate stila @page. -->
+<style media="print">@page { margin: 0; }</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Bricolage+Grotesque:wght@400;500;600&display=swap">
 </head>
-<body class="min-h-screen font-sans bg-[#eef1ee] text-[#1c2a2f] dark:bg-[#11191c] dark:text-[#e8eeec] print:bg-white print:text-black">
-<div class="max-w-6xl mx-auto px-4 py-8">
 
-  <header class="print:hidden mb-8">
-    <h1 class="font-serif text-4xl sm:text-5xl font-semibold">Generator de albume foto</h1>
-    <p class="mt-2 text-[#5d6b70] dark:text-[#93a3a8]">Încarcă fotografii, scrie titluri, alege un aspect. Imaginile rămân în browserul tău.</p>
-  </header>
+<body class="min-h-screen bg-zinc-100 font-sans text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100 print:bg-white print:p-10 print:text-black">
 
-  <section data-panel class="print:hidden p-5 grid gap-5 md:grid-cols-2 mb-8">
-    <div class="grid gap-3">
-      <label class="grid gap-1 text-sm">Titlul albumului
-        <input id="title" data-field value="Vara la mare" maxlength="60">
-      </label>
-      <label class="grid gap-1 text-sm">Subtitlu
-        <input id="subtitle" data-field value="Iulie 2026" maxlength="80">
-      </label>
-    </div>
+<!-- ============ BARA DE UNELTE ============ -->
+<header class="sticky top-0 z-20 border-b border-zinc-200 bg-white/85 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85 print:hidden">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3">
 
-    <div class="grid gap-3 content-start">
-      <div>
-        <div class="text-sm mb-1">Aspect</div>
-        <div id="layouts" class="inline-flex">
-          <button data-l="grid">Grilă</button>
-          <button data-l="mosaic">Mozaic</button>
-          <button data-l="pol">Polaroid</button>
-        </div>
-      </div>
-      <div>
-        <label for="cols" class="text-sm">Coloane: <b id="colsVal">3</b></label>
-        <input id="cols" type="range" min="2" max="5" value="3" class="w-full accent-[#1f6f78] dark:accent-[#5fb7c0]">
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button data-btn id="themeBtn">Temă: automată</button>
-        <button data-btn id="slideBtn">Prezentare</button>
-        <button data-btn id="printBtn">Tipărește / PDF</button>
-        <button data-btn id="clearBtn">Șterge tot</button>
-      </div>
-    </div>
-
-    <label id="drop" class="md:col-span-2 grid place-items-center gap-1 py-8 text-center cursor-pointer rounded-xl border-2 border-dashed border-[#d5dcd8] dark:border-[#2d3c42]">
-      <span class="font-serif text-xl">Trage fotografiile aici sau apasă pentru a le alege</span>
-      <span class="text-sm text-[#5d6b70] dark:text-[#93a3a8]">JPG, PNG, WebP – poți selecta mai multe deodată</span>
+    <!-- Adaugă fotografii (buton principal) -->
+    <label for="file" class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-rose-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-800 active:scale-[.98] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-rose-700 dark:bg-rose-500 dark:text-zinc-950 dark:hover:bg-rose-400">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Adaugă fotografii
       <input id="file" type="file" accept="image/*" multiple class="sr-only">
     </label>
-  </section>
 
-  <section id="album">
-    <div class="text-center mb-8">
-      <h2 id="outTitle" class="font-serif text-4xl sm:text-6xl font-semibold"></h2>
-      <p id="outSub" class="font-serif italic text-xl mt-2 text-[#5d6b70] dark:text-[#93a3a8] print:text-black"></p>
-      <p id="count" class="text-sm mt-3 text-[#5d6b70] dark:text-[#93a3a8] print:hidden"></p>
+    <!-- Aspect -->
+    <div id="layouts" class="inline-flex rounded-lg border border-zinc-300 bg-zinc-200/60 p-0.5 dark:border-zinc-700 dark:bg-zinc-800" role="group" aria-label="Aspect album">
+      <button type="button" data-l="grid" class="rounded-md bg-white px-3 py-1.5 text-sm font-medium text-zinc-900 shadow-sm transition dark:bg-zinc-600 dark:text-white">Grilă</button>
+      <button type="button" data-l="mosaic" class="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">Mozaic</button>
+      <button type="button" data-l="pol" class="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white">Polaroid</button>
     </div>
-    <div id="gallery"></div>
-    <p id="empty" class="text-center py-16 text-[#5d6b70] dark:text-[#93a3a8]">Albumul e gol. Adaugă prima fotografie.</p>
-  </section>
-</div>
 
-<div id="lb" role="dialog" aria-modal="true" aria-label="Vizualizare fotografie"
-     class="hidden fixed inset-0 z-50 flex-col items-center justify-center p-4 bg-[#080d0f]/95">
-  <img id="lbImg" alt="" class="max-w-full max-h-[78vh] rounded">
-  <p id="lbCap" class="font-serif italic text-white text-xl mt-3 text-center"></p>
-  <div class="flex gap-2 mt-4">
-    <button data-btn id="prev">‹ Înapoi</button>
-    <button data-btn id="next">Înainte ›</button>
-    <button data-btn id="close">Închide</button>
+    <!-- Coloane -->
+    <div class="inline-flex items-center rounded-lg border border-zinc-300 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800" role="group" aria-label="Număr de coloane">
+      <button type="button" id="colsMinus" aria-label="Mai puține coloane" class="grid h-9 w-9 place-items-center rounded-l-lg text-lg text-zinc-700 transition hover:bg-zinc-100 active:bg-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-700">−</button>
+      <span class="min-w-[5.5rem] select-none px-2 text-center text-sm"><b id="colsVal">3</b> coloane</span>
+      <button type="button" id="colsPlus" aria-label="Mai multe coloane" class="grid h-9 w-9 place-items-center rounded-r-lg text-lg text-zinc-700 transition hover:bg-zinc-100 active:bg-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-700">+</button>
+    </div>
+
+    <!-- Acțiuni -->
+    <div class="ml-auto flex flex-wrap items-center gap-2">
+      <button type="button" id="slideBtn" class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 active:scale-[.98] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>
+        <span id="slideLbl">Prezentare</span>
+      </button>
+      <button type="button" id="printBtn" class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 active:scale-[.98] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        PDF / Tipărire
+      </button>
+      <button type="button" id="themeBtn" class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 active:scale-[.98] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+        <span id="themeLbl">Auto</span>
+      </button>
+      <button type="button" id="clearBtn" class="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 shadow-sm transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-700 active:scale-[.98] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:border-rose-400 dark:hover:bg-rose-950 dark:hover:text-rose-300">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        Șterge tot
+      </button>
+    </div>
   </div>
+</header>
+
+<!-- ============ ALBUMUL ============ -->
+<main class="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:pt-14">
+
+  <div class="mb-10 text-center">
+    <input id="title" value="Vara la mare" maxlength="60" aria-label="Titlul albumului" placeholder="Titlul albumului"
+      class="w-full rounded-lg bg-transparent px-2 text-center font-serif text-5xl font-semibold tracking-tight placeholder:text-zinc-300 hover:bg-black/5 focus:bg-black/5 focus:outline-none sm:text-7xl dark:placeholder:text-zinc-700 dark:hover:bg-white/5 dark:focus:bg-white/5 print:hover:bg-transparent">
+    <input id="subtitle" value="Iulie 2026" maxlength="80" aria-label="Subtitlu" placeholder="Subtitlu"
+      class="mt-2 w-full rounded-lg bg-transparent px-2 text-center font-serif text-xl italic text-zinc-500 placeholder:text-zinc-300 hover:bg-black/5 focus:bg-black/5 focus:outline-none sm:text-2xl dark:text-zinc-400 dark:placeholder:text-zinc-700 dark:hover:bg-white/5 dark:focus:bg-white/5 print:hover:bg-transparent">
+    <p id="count" class="mt-3 text-sm text-zinc-500 dark:text-zinc-400 print:hidden"></p>
+  </div>
+
+  <!-- stare goală / zonă de încărcare -->
+  <label id="empty" for="file" class="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-zinc-300 bg-white/60 px-6 py-20 text-center transition hover:border-rose-600 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/60 dark:hover:border-rose-400 dark:hover:bg-zinc-900 print:hidden">
+    <svg class="h-10 w-10 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/></svg>
+    <span class="font-serif text-2xl">Albumul e gol</span>
+    <span class="text-sm text-zinc-500 dark:text-zinc-400">Trage fotografiile aici sau apasă pentru a le alege (JPG, PNG, WebP)</span>
+  </label>
+
+  <div id="gallery"></div>
+</main>
+
+<!-- ============ STRAT PENTRU DRAG & DROP ============ -->
+<div id="dropOverlay" class="pointer-events-none fixed inset-0 z-40 hidden items-center justify-center bg-rose-700/85 font-serif text-3xl text-white">
+  Lasă fotografiile aici
 </div>
 
-<script src="app.js"></script>
+<!-- ============ VIZUALIZARE MARE ============ -->
+<div id="lb" role="dialog" aria-modal="true" aria-label="Vizualizare fotografie" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-black/90 p-4">
+  <button type="button" id="close" aria-label="Închide" class="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-2xl text-white transition hover:bg-white/25">×</button>
+  <button type="button" id="prev" aria-label="Fotografia anterioară" class="absolute left-3 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/25">‹</button>
+  <button type="button" id="next" aria-label="Fotografia următoare" class="absolute right-3 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-3xl text-white transition hover:bg-white/25">›</button>
+  <img id="lbImg" alt="" class="max-h-[78vh] max-w-full rounded shadow-2xl">
+  <p id="lbCap" class="mt-4 text-center font-serif text-xl italic text-white"></p>
+  <p id="lbNum" class="mt-1 text-sm text-white/60"></p>
+</div>
+
+<script src = "app.js"></script>
 </body>
 </html>

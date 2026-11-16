@@ -15,7 +15,7 @@ Fotografiile nu sunt trimise nicăieri: rămân local, în memoria paginii.
 ## Structură
 ```
 index.html
-js/app.js
+app.js
 ```
 
 ## Rulare locală
