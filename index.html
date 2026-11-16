@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generator de albume foto</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: { extend: { fontFamily: {
+      sans: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
+      serif: ['Newsreader', 'Georgia', 'serif']
+    } } }
+  };
+</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=Bricolage+Grotesque:wght@400;600&display=swap">
+</head>
+<body class="min-h-screen font-sans bg-[#eef1ee] text-[#1c2a2f] dark:bg-[#11191c] dark:text-[#e8eeec] print:bg-white print:text-black">
+<div class="max-w-6xl mx-auto px-4 py-8">
+
+  <header class="print:hidden mb-8">
+    <h1 class="font-serif text-4xl sm:text-5xl font-semibold">Generator de albume foto</h1>
+    <p class="mt-2 text-[#5d6b70] dark:text-[#93a3a8]">Încarcă fotografii, scrie titluri, alege un aspect. Imaginile rămân în browserul tău.</p>
+  </header>
+
+  <section data-panel class="print:hidden p-5 grid gap-5 md:grid-cols-2 mb-8">
+    <div class="grid gap-3">
+      <label class="grid gap-1 text-sm">Titlul albumului
+        <input id="title" data-field value="Vara la mare" maxlength="60">
+      </label>
+      <label class="grid gap-1 text-sm">Subtitlu
+        <input id="subtitle" data-field value="Iulie 2026" maxlength="80">
+      </label>
+    </div>
+
+    <div class="grid gap-3 content-start">
+      <div>
+        <div class="text-sm mb-1">Aspect</div>
+        <div id="layouts" class="inline-flex">
+          <button data-l="grid">Grilă</button>
+          <button data-l="mosaic">Mozaic</button>
+          <button data-l="pol">Polaroid</button>
+        </div>
+      </div>
+      <div>
+        <label for="cols" class="text-sm">Coloane: <b id="colsVal">3</b></label>
+        <input id="cols" type="range" min="2" max="5" value="3" class="w-full accent-[#1f6f78] dark:accent-[#5fb7c0]">
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button data-btn id="themeBtn">Temă: automată</button>
+        <button data-btn id="slideBtn">Prezentare</button>
+        <button data-btn id="printBtn">Tipărește / PDF</button>
+        <button data-btn id="clearBtn">Șterge tot</button>
+      </div>
+    </div>
+
+    <label id="drop" class="md:col-span-2 grid place-items-center gap-1 py-8 text-center cursor-pointer rounded-xl border-2 border-dashed border-[#d5dcd8] dark:border-[#2d3c42]">
+      <span class="font-serif text-xl">Trage fotografiile aici sau apasă pentru a le alege</span>
+      <span class="text-sm text-[#5d6b70] dark:text-[#93a3a8]">JPG, PNG, WebP – poți selecta mai multe deodată</span>
+      <input id="file" type="file" accept="image/*" multiple class="sr-only">
+    </label>
+  </section>
+
+  <section id="album">
+    <div class="text-center mb-8">
+      <h2 id="outTitle" class="font-serif text-4xl sm:text-6xl font-semibold"></h2>
+      <p id="outSub" class="font-serif italic text-xl mt-2 text-[#5d6b70] dark:text-[#93a3a8] print:text-black"></p>
+      <p id="count" class="text-sm mt-3 text-[#5d6b70] dark:text-[#93a3a8] print:hidden"></p>
+    </div>
+    <div id="gallery"></div>
+    <p id="empty" class="text-center py-16 text-[#5d6b70] dark:text-[#93a3a8]">Albumul e gol. Adaugă prima fotografie.</p>
+  </section>
+</div>
+
+<div id="lb" role="dialog" aria-modal="true" aria-label="Vizualizare fotografie"
+     class="hidden fixed inset-0 z-50 flex-col items-center justify-center p-4 bg-[#080d0f]/95">
+  <img id="lbImg" alt="" class="max-w-full max-h-[78vh] rounded">
+  <p id="lbCap" class="font-serif italic text-white text-xl mt-3 text-center"></p>
+  <div class="flex gap-2 mt-4">
+    <button data-btn id="prev">‹ Înapoi</button>
+    <button data-btn id="next">Înainte ›</button>
+    <button data-btn id="close">Închide</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
